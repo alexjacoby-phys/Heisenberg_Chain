@@ -1,4 +1,3 @@
-import LinearAlgebra, SparseArrays
 include("H_Maker.jl")
 
 
@@ -54,10 +53,6 @@ begin
         end
         return kron(kp...)
     end
-
-
-
-
 
     function bitstrings(N::Int64)
         possibilities = collect(Iterators.product(Iterators.repeated((true, false), N)...))
@@ -237,3 +232,14 @@ begin
     #     return newrho
     # end
 end
+
+
+
+
+
+# function choi_state(L::Int64,)
+#     D =2^(2L)
+#     psi = SparseArrays.spzeros(D)
+#     for R in bistrings(L)
+#         psi += kron
+    
