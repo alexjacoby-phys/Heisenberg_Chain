@@ -163,10 +163,18 @@ begin
         SvN = -1.0 * LinearAlgebra.dot(Dat, log.(Dat))
         return SvN
     end
-    function SvN(rho::Matrix{ComplexF64}, k::Int)
-        Dat = LinearAlgebra.eigvals(rho + 10.0^(-k) * LinearAlgebra.I)
-        SvN = -1.0 * LinearAlgebra.dot(Dat, log.(Dat))
-        return SvN
+    "Takes a state vector and makes bipartition according to A, B. The default on site dimension is set to two but can be changed freely. Furthermore, an ϵ is included to ensure convergence with a default value of 10^-14. You must have loaded linear algebra for this to work"
+    function SvN(psi::Vector{ComplexF64}, A::Int64, B::Int64, dim::Int64=2, ϵ::Float64=10e-15)
+        svn_mat = reshape(psi, dim^A, dim^B)
+        spectrum = LinearAlgebra.svdvals(svn_mat) .^ 2
+        svn_vec = spectrum .* log.(spectrum + LinearAlgebra.fill(ϵ, dim^(min(A, B))))
+        return -sum(svn_vec)
+    end
+    function SvN(psi::SparseArrays.SparseVector{ComplexF64,Int64}, A::Int64, B::Int64, dim::Int64=2, ϵ::Float64=10e-15)
+        svn_mat = reshape(psi, dim^A, dim^B)
+        spectrum = LinearAlgebra.svdvals(Matrix(svn_mat)) .^ 2
+        svn_vec = spectrum .* log.(spectrum + LinearAlgebra.fill(ϵ, dim^(min(A, B))))
+        return -sum(svn_vec)
     end
 end
 #this is my trash bin of potentially useful code that is not currently in use

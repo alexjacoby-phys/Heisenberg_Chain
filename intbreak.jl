@@ -2,8 +2,8 @@ include("H_Maker.jl")
 include("qi_tools.jl")
 
 
-
-
+H = Matrix(make_H(14))
+LinearAlgebra.eigen(H)
 
 "Enter in order L, T, δT, disorder strengths (format as a tuple), and then provide a file name."
 function run_me(L::Int64, T::Float64, δ::Float64, disorder_strengths::Vector{Float64}, ps::Vector{Int64}, filename::String; ϵ::Float64=10e-15)

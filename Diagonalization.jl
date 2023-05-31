@@ -2,28 +2,44 @@ include("H_Maker.jl")
 include("qi_tools.jl")
 import Plots
 
+A = [ 0 1 ; 0 1]
 
-L = 6
+
+for i in enumerate(A)
+    print(i)
+end
+L = 14
+
+H = make_H(L)
+
+
+LinearAlgebra.eigen(Matrix(H))
+
+
+# Matrix(H)
+
+
+
+#  H = Matrix(make_H(L))
+
+
+# psi  = KrylovKit.exponentiate(H, im * δ, psi)
+# KrylovKit.exponentiate(H, im * δ, psi0)
 
 
 
 @time H = make_HH(L)
 #@time H = make_HH(L, [0.5, 0.5, 1.0])
-@time H += .1 *disorder_HH(L)
+#@time H += .1 *disorder_HH(L)
 #@time KrylovKit.eigsolve(H)
 
 PS1 = fill(1, L)
 PS1[1] = PS1[2] = 2
 @time psi0 = ps_states(PS1, L)
 
-
-
-
-
-maxT = 20.0
+maxT = 1.0
 δ = 0.01
 τ = 0.0:δ:maxT
-
 
 
 # dat = zeros(Float64, 0)
@@ -39,8 +55,7 @@ dat2 = zeros(Float64, 0)
 psi = psi0
 for t in τ
     psi, info = KrylovKit.exponentiate(H, im * δ, psi)
-    rho = Partial_Trace_Opstate(psi, L ÷ 2, L - (L ÷ 2), 0, L)
-    append!(dat2, SvN_Small(Matrix(rho + 10e-10 * LinearAlgebra.I)))
+    append!(dat2, SvN(psi,L÷2,L-(L÷2),4))
     println("time=", t)
 end
 

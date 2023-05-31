@@ -1,7 +1,7 @@
 import Plots, DelimitedFiles
 
 
-L = 8
+L = 10
 T = 5.0
 δ = 0.02
 τ = 0.0:δ:T
@@ -36,7 +36,7 @@ for i in 1:5
     Plots.plot!(τ, data_table[i, :], xlabel = "Time (No Units)", ylabel = "LOE", linewidth=6, color=GRAD[i], label=Labels[i], legend=:right, markersize=6, markeralpha=0.8) #=,seriestype = :scatter=#
 end
 Plots.plot!()
-Plots.savefig("intbreak-L=8.pdf")
+Plots.savefig("intbreak-L=10.pdf")
 
 
 
@@ -46,5 +46,5 @@ for i in 1:5
     Plots.plot!(τ, exp.(data_table[i, :]), xlabel = "Time (No Units)", ylabel = "LOE (Exponential)", linewidth=6, color=GRAD[i], label=Labels[i], legend=:right, markersize=6, markeralpha=0.8) #=,seriestype = :scatter=#
 end
 Plots.plot!()
-Plots.savefig("intbreak-L=8_logtime.pdf")
+Plots.savefig("intbreak-L=10_logtime.pdf")
 
