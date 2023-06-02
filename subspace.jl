@@ -55,6 +55,27 @@ end
 
 
 
+# eigendat = LinearAlgebra.eigen(Matrix(H_Q(16, 7)))
+
+# S = eigendat.vectors'
+# t = 1.0
+# U = S' * LinearAlgebra.diagm(exp.(-im * t * eigendat.values)) * S
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -100,12 +121,5 @@ end
 
 
 
-
-
-eigendat = LinearAlgebra.eigen(Matrix(H_Q(16,7)))
-
-S = eigendat.vectors'
-t= 1.
-U = S' * LinearAlgebra.diagm(exp.(-im * t * eigendat.values)) * S
 
 

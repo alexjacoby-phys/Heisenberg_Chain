@@ -23,8 +23,14 @@ end
 
 
 
-testtuple =(1,2,3,4,5)
-length(testtuple)
+basis_bitstrings(10,3)
+
+basis_converter(10,3)
+
+function Q_reshape(L::Int64,A::Int64, B::Int64, Q::Int64, QA::Int64,QB::Int64,op::Matrix{ComplexF64})
+    cvec = basis_converter(L,Q)
+    svdmat = SparseArrays.spzeros(ComplexF64, )
+
 
 
 
