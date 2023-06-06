@@ -129,6 +129,12 @@ QBtilde = Q - QAtilde
 
 
 
+Full_basis =  basis_bitstrings(L,Q)
+Full_double_basis = vec([vcat(Full_basis[i, :]..., Full_basis[j, :]...) for j in 1:size(Full_basis, 1), i in 1:size(Full_basis, 1)])
+
+basis_dict = Dict([(getbitindex(Full_double_basis[i], 2*L), i) for i in 1:length(Full_double_basis)])
+#basis_dict = Dict([ (getbitindex(Full_basis[i,:],L),i) for i in 1:size(Full_basis,1)])
+
 
 
 BasisA = basis_bitstrings(A,QA)
@@ -139,15 +145,28 @@ BasisBtilde = basis_bitstrings(B,QBtilde)
 doubled_basis_A = vec([vcat(BasisA[i,:]...,BasisAtilde[j,:]...) for j in 1:size(BasisAtilde,1), i in 1:size(BasisA,1)])
 doubled_basis_B = vec([vcat(BasisB[i, :]..., BasisBtilde[j, :]...) for j in 1:size(BasisBtilde, 1), i in 1:size(BasisB, 1)])
 
-map_mat = collect(Iterators.product(doubled_basis_A,doubled_basis_B))
 
-test = map_
-ind_vec = vcat(test[1][1:A]...,test[2][1:B]...,test[1][(A+1):2A]...,test[2][(B+1):2B]...)
-getbitindex(ind_vec,2*L)
-
-function get_H_Q_index(A::Int64,B::Int64,svd_index::Tuple{Vector{Int64},Vector{Int64}})
+function get_Fullspace_index(A::Int64,B::Int64,svd_index::Tuple{Vector{Int64},Vector{Int64}})
     ind_vec = vcat(svd_index[1][1:A]...,svd_index[2][1:B]...,svd_index[1][(A+1):2A]...,svd_index[2][(B+1):2B]...)
     return getbitindex(ind_vec,2*L)
 end
 
-get_H_Q_index.(A,B,map_mat)
+function Qspace_dict(full_entry::Int64,basis_map::Dict{Int64,Int64})
+    return basis_map[full_entry]
+end
+
+
+
+
+map_mat = collect(Iterators.product(doubled_basis_A,doubled_basis_B))
+
+
+dnx = get_Fullspace_index.(A,B,map_mat)
+
+
+Qspace_dict(78,basis_dict)
+
+Qspace_dict.(dnx,basis_dict)
+
+nm = [ Qspace_dict(dnx[i,j],basis_dict) for i in 1:size(dnx,1), j in 1:size(dnx,2)]
+
