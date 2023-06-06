@@ -27,24 +27,30 @@ basis_bitstrings(10,3)
 
 basis_converter(10,3)
 
-function Q_reshape(L::Int64,A::Int64, B::Int64, Q::Int64, QA::Int64,QB::Int64,op::Matrix{ComplexF64})
-    cvec = basis_converter(L,Q)
-    svdmat = SparseArrays.spzeros(ComplexF64, )
+# function Q_reshape(L::Int64,A::Int64, B::Int64, Q::Int64, QA::Int64,QB::Int64,op::Matrix{ComplexF64})
+#     cvec = basis_converter(L,Q)
+#     svdmat = SparseArrays.spzeros(ComplexF64, )
 
 
+L = 10 
+psi = LinearAlgebra.normalize(rand(ComplexF64,2^L))
+sites = (1, 2 , 4) 
+
+sort([4,2,1])
 
 
-function svd_op_reshape(op::Matrix{ComplexF64},sites::Tuple{Int64},L::Int64; Hdim::Int64 = 2, ϵ = 10e-15)
-    opstate_svd = zeros(Float64,Hdim^(2*length(sites)), Hdim^(2L-2*length(sites)))
-    for (ind, val) in pairs(op)
-        a = embed(digits(ind[1]-1, base = Hdim),L)
-        b = embed(digits(ind[2]-1, base = Hdim),L)
-        for n in 1:L for m in 1:L
-            
-        end
-    end
-    return
+function svd_state_reshape(state:Vector{ComplexF64},sites_prelim::Vector{Int64} ;Hdim = 2)
+    sites = 
+    basis_bitstrings(length(sites))
+
 end
 
 
-in()
+
+function Q_state_reshape()
+    
+end
+
+
+
+

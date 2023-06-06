@@ -81,13 +81,6 @@ end
 
 
 
-
-
-
-
-
-
-
 # function H_Qv1(L::Int64, Q::Int64; sparse::Bool=false)
 #     D = binomial(L, Q)
 #     H = SparseArrays.spzeros(D, D)
@@ -120,6 +113,41 @@ end
 # end
 
 
+#Work in Q = 3 subspace on A and Q = 1 subspace on Atilde
+L = 7
+Q = 4
+
+A = 3
+B = 4
+
+
+QA = 2
+QB = Q - QA
+
+QAtilde = 1
+QBtilde = Q - QAtilde
 
 
 
+
+
+BasisA = basis_bitstrings(A,QA)
+BasisB = basis_bitstrings(B,QB)
+BasisAtilde = basis_bitstrings(A,QAtilde)
+BasisBtilde = basis_bitstrings(B,QBtilde)
+
+doubled_basis_A = vec([vcat(BasisA[i,:]...,BasisAtilde[j,:]...) for j in 1:size(BasisAtilde,1), i in 1:size(BasisA,1)])
+doubled_basis_B = vec([vcat(BasisB[i, :]..., BasisBtilde[j, :]...) for j in 1:size(BasisBtilde, 1), i in 1:size(BasisB, 1)])
+
+map_mat = collect(Iterators.product(doubled_basis_A,doubled_basis_B))
+
+test = map_
+ind_vec = vcat(test[1][1:A]...,test[2][1:B]...,test[1][(A+1):2A]...,test[2][(B+1):2B]...)
+getbitindex(ind_vec,2*L)
+
+function get_H_Q_index(A::Int64,B::Int64,svd_index::Tuple{Vector{Int64},Vector{Int64}})
+    ind_vec = vcat(svd_index[1][1:A]...,svd_index[2][1:B]...,svd_index[1][(A+1):2A]...,svd_index[2][(B+1):2B]...)
+    return getbitindex(ind_vec,2*L)
+end
+
+get_H_Q_index.(A,B,map_mat)
