@@ -1,5 +1,7 @@
 include("H_Maker.jl")
-import SparseArrays
+
+
+
 
 
 function bitstrings(N::Int64)
@@ -53,120 +55,227 @@ function H_Q(L::Int64, Q::Int64)
 end
 
 
-
-
-# eigendat = LinearAlgebra.eigen(Matrix(H_Q(16, 7)))
-
-# S = eigendat.vectors'
-# t = 1.0
-# U = S' * LinearAlgebra.diagm(exp.(-im * t * eigendat.values)) * S
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# function H_Qv1(L::Int64, Q::Int64; sparse::Bool=false)
-#     D = binomial(L, Q)
-#     H = SparseArrays.spzeros(D, D)
-#     H0 = make_H(L)
-#     cvec = basis_converter(L, Q)
-#     println("Starting Constructor")
-#     R = D^2
-#     for i in 1:D, j in 1:D
-#         H[i, j] = H0[cvec[i], cvec[j]]
-#     end
-#     return H
-# end
-
-# function H_Qv2(L::Int64, Q::Int64)
-#     Dim = binomial(L, Q)
-#     cvec = basis_converter(L, Q)
-#     indmat = collect(Iterators.product(cvec, cvec))
-#     H0 = make_H(L)
-#     H = SparseArrays.spzeros(ComplexF64, Dim, Dim)
-#     for (Qind, fullind) in pairs(indmat)
-#         H[Qind] = H0[fullind...]
-#     end
-#     return H
-# end
-
-# function H_Qv3(L::Int64,Q::Int64)
-#     cvec = basis_converter(L,Q)
-#     H0 = make_H(L)
-#     return H0[cvec,cvec]
-# end
-
-
-#Work in Q = 3 subspace on A and Q = 1 subspace on Atilde
-L = 7
-Q = 4
-
-A = 3
-B = 4
-
-
-QA = 2
-QB = Q - QA
-
-QAtilde = 1
-QBtilde = Q - QAtilde
-
-
-
-Full_basis =  basis_bitstrings(L,Q)
-Full_double_basis = vec([vcat(Full_basis[i, :]..., Full_basis[j, :]...) for j in 1:size(Full_basis, 1), i in 1:size(Full_basis, 1)])
-
-basis_dict = Dict([(getbitindex(Full_double_basis[i], 2*L), i) for i in 1:length(Full_double_basis)])
-#basis_dict = Dict([ (getbitindex(Full_basis[i,:],L),i) for i in 1:size(Full_basis,1)])
-
-
-
-BasisA = basis_bitstrings(A,QA)
-BasisB = basis_bitstrings(B,QB)
-BasisAtilde = basis_bitstrings(A,QAtilde)
-BasisBtilde = basis_bitstrings(B,QBtilde)
-
-doubled_basis_A = vec([vcat(BasisA[i,:]...,BasisAtilde[j,:]...) for j in 1:size(BasisAtilde,1), i in 1:size(BasisA,1)])
-doubled_basis_B = vec([vcat(BasisB[i, :]..., BasisBtilde[j, :]...) for j in 1:size(BasisBtilde, 1), i in 1:size(BasisB, 1)])
-
-
-function get_Fullspace_index(A::Int64,B::Int64,svd_index::Tuple{Vector{Int64},Vector{Int64}})
-    ind_vec = vcat(svd_index[1][1:A]...,svd_index[2][1:B]...,svd_index[1][(A+1):2A]...,svd_index[2][(B+1):2B]...)
-    return getbitindex(ind_vec,2*L)
+function get_Fullspace_index(A::Int64, B::Int64, svd_index::Tuple{Vector{Int64},Vector{Int64}}, L::Int64)
+    ind_vec = vcat(svd_index[1][1:A]..., svd_index[2][1:B]..., svd_index[1][(A+1):2A]..., svd_index[2][(B+1):2B]...)
+    return getbitindex(ind_vec, 2 * L)
 end
 
-function Qspace_dict(full_entry::Int64,basis_map::Dict{Int64,Int64})
+
+
+function Qspace_dict(full_entry::Int64, basis_map::Dict{Int64,Int64})
     return basis_map[full_entry]
 end
 
 
+# "This function is outdated and shouldn't be used. It is correct but it will crash julia for even reasonably sized chains."
+# function operator_reshape_ind_mat(;L::Int64, A::Int64,B::Int64,Q::Int64, QA::Int64, QAtilde::Int64)
+#     if (A + B) != L
+#         return "You are a big dumb idiot"
+#     end
+#     QB = Q - QA
+#     QBtilde = Q - QAtilde
 
 
-map_mat = collect(Iterators.product(doubled_basis_A,doubled_basis_B))
+#     Full_basis = basis_bitstrings(L, Q)
+#     Full_double_basis = vec([vcat(Full_basis[i, :]..., Full_basis[j, :]...) for j in 1:size(Full_basis, 1), i in 1:size(Full_basis, 1)])
+#     basis_dict = Dict([(getbitindex(Full_double_basis[i], 2 * L), i) for i in 1:length(Full_double_basis)])
+
+#     BasisA = basis_bitstrings(A, QA)
+#     BasisB = basis_bitstrings(B, QB)
+#     BasisAtilde = basis_bitstrings(A, QAtilde)
+#     BasisBtilde = basis_bitstrings(B, QBtilde)
+
+#     doubled_basis_A = vec([vcat(BasisA[i, :]..., BasisAtilde[j, :]...) for j in 1:size(BasisAtilde, 1), i in 1:size(BasisA, 1)])
+#     doubled_basis_B = vec([vcat(BasisB[i, :]..., BasisBtilde[j, :]...) for j in 1:size(BasisBtilde, 1), i in 1:size(BasisB, 1)])
+
+#     map_mat = collect(Iterators.product(doubled_basis_A, doubled_basis_B))
+#     fullspace_index_mat = get_Fullspace_index.(A, B, map_mat, L)
+#     new_indmat = [Qspace_dict(fullspace_index_mat[i, j], basis_dict) for i in 1:size(fullspace_index_mat, 1), j in 1:size(fullspace_index_mat, 2)]
+#     return new_indmat
+# end
 
 
-dnx = get_Fullspace_index.(A,B,map_mat)
+function get_index_very_specific(X::Tuple{Tuple{SparseArrays.SparseVector{Int64,Int64},SparseArrays.SparseVector{Int64,Int64}},Tuple{SparseArrays.SparseVector{Int64,Int64},SparseArrays.SparseVector{Int64,Int64}}}; length::Int64)
+    return (getbitindex(vcat(X[1][1], X[2][1]), length), getbitindex(vcat(X[1][2], X[2][2]), length))
+end
+
+function tupledex(R::Tuple{Int64,Int64}, N::Int64)
+    return R[1] + (R[2] - 1) * N
+end
 
 
-Qspace_dict(78,basis_dict)
 
-Qspace_dict.(dnx,basis_dict)
 
-nm = [ Qspace_dict(dnx[i,j],basis_dict) for i in 1:size(dnx,1), j in 1:size(dnx,2)]
 
+
+
+#"I think this is wrong????"
+# function QtoSVD_Basis(; L::Int64, Q::Int64, A::Int64, B::Int64, QA::Int64, QAtilde::Int64)
+#     QB = Q - QA
+#     QBtilde = Q - QAtilde
+
+#     Full_basis = basis_bitstrings(L, Q)
+#     basis_dict = Dict([(getbitindex(Full_basis[i, :], L), i) for i in 1:size(Full_basis, 1)])
+
+#     BasisA = basis_bitstrings(A, QA)
+#     BasisB = basis_bitstrings(B, QB)
+#     BasisAtilde = basis_bitstrings(A, QAtilde)
+#     BasisBtilde = basis_bitstrings(B, QBtilde)
+
+#     nba = [BasisA[i, :] for i in 1:size(BasisA, 1)]
+#     nbatilde = [BasisAtilde[i, :] for i in 1:size(BasisAtilde, 1)]
+#     nbb = [BasisB[i, :] for i in 1:size(BasisB, 1)]
+#     nbbtilde = [BasisBtilde[i, :] for i in 1:size(BasisBtilde, 1)]
+
+#     nbadouble = vec(collect(Iterators.product(nba, nbatilde)))
+#     nbbdouble = vec(collect(Iterators.product(nbb, nbbtilde)))
+
+#     J = collect(Iterators.product(nbadouble, nbbdouble))
+
+#     P = get_index_very_specific.(J, length=L)
+
+#     return tupledex.([(basis_dict[entry[1]], basis_dict[entry[2]]) for entry in P],length(Full_basis))
+# end
+
+
+"To transform an operator use [op[entry...] for entry in output_of_this_function]"
+function QtoSVD_Basis_Tuple(; L::Int64, Q::Int64, A::Int64, B::Int64, QA::Int64, QAtilde::Int64)
+    QB = Q - QA
+    QBtilde = Q - QAtilde
+
+    Full_basis = basis_bitstrings(L, Q)
+    basis_dict = Dict([(getbitindex(Full_basis[i, :], L), i) for i in 1:size(Full_basis, 1)])
+
+    BasisA = basis_bitstrings(A, QA)
+    BasisB = basis_bitstrings(B, QB)
+    BasisAtilde = basis_bitstrings(A, QAtilde)
+    BasisBtilde = basis_bitstrings(B, QBtilde)
+
+    nba = [BasisA[i, :] for i in 1:size(BasisA, 1)]
+    nbatilde = [BasisAtilde[i, :] for i in 1:size(BasisAtilde, 1)]
+    nbb = [BasisB[i, :] for i in 1:size(BasisB, 1)]
+    nbbtilde = [BasisBtilde[i, :] for i in 1:size(BasisBtilde, 1)]
+
+    nbadouble = vec(collect(Iterators.product(nba, nbatilde)))
+    nbbdouble = vec(collect(Iterators.product(nbb, nbbtilde)))
+
+    J = collect(Iterators.product(nbadouble, nbbdouble))
+
+    P = get_index_very_specific.(J, length=L)
+
+    return [(basis_dict[entry[1]], basis_dict[entry[2]]) for entry in P]
+end
+
+
+# N= 973
+# Avec = Vector{Int64}(1:N^2)
+# A = reshape(Avec, N,N)
+# B = [ (i,j) for i in 1:N, j in 1:N]
+
+# function tupledex(R::Tuple{Int64,Int64},N::Int64)
+#     return R[1] + (R[2]-1)*N 
+# end
+
+# tupledex.(B,N) == A
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+begin
+    #Work in Q = 3 subspace on A and Q = 1 subspace on Atilde
+    # L = 7
+    # Q = 4
+
+    # A = 3
+    # B = 4
+
+
+    # QA = 2
+    # QB = Q - QA
+
+    # QAtilde = 1
+    # QBtilde = Q - QAtilde
+
+
+
+    # Full_basis =  basis_bitstrings(L,Q)
+    # Full_double_basis = vec([vcat(Full_basis[i, :]..., Full_basis[j, :]...) for j in 1:size(Full_basis, 1), i in 1:size(Full_basis, 1)])
+
+    # basis_dict = Dict([(getbitindex(Full_double_basis[i], 2*L), i) for i in 1:length(Full_double_basis)])
+    # #basis_dict = Dict([ (getbitindex(Full_basis[i,:],L),i) for i in 1:size(Full_basis,1)])
+
+
+
+
+    # fullspace_index_mat = get_Fullspace_index.(A,B,map_mat)
+
+
+
+
+
+
+
+    # new_indmat = [Qspace_dict(fullspace_index_mat[i, j], basis_dict) for j in 1:size(fullspace_index_mat, 2), i in 1:size(fullspace_index_mat, 1)]
+
+
+
+
+    # LinearAlgebra.svdvals(nm)
+
+
+
+
+    # eigendat = LinearAlgebra.eigen(Matrix(H_Q(16, 7)))
+
+    # S = eigendat.vectors'
+    # t = 1.0
+    # U = S' * LinearAlgebra.diagm(exp.(-im * t * eigendat.values)) * S
+
+
+
+
+
+    # function H_Qv1(L::Int64, Q::Int64; sparse::Bool=false)
+    #     D = binomial(L, Q)
+    #     H = SparseArrays.spzeros(D, D)
+    #     H0 = make_H(L)
+    #     cvec = basis_converter(L, Q)
+    #     println("Starting Constructor")
+    #     R = D^2
+    #     for i in 1:D, j in 1:D
+    #         H[i, j] = H0[cvec[i], cvec[j]]
+    #     end
+    #     return H
+    # end
+
+    # function H_Qv2(L::Int64, Q::Int64)
+    #     Dim = binomial(L, Q)
+    #     cvec = basis_converter(L, Q)
+    #     indmat = collect(Iterators.product(cvec, cvec))
+    #     H0 = make_H(L)
+    #     H = SparseArrays.spzeros(ComplexF64, Dim, Dim)
+    #     for (Qind, fullind) in pairs(indmat)
+    #         H[Qind] = H0[fullind...]
+    #     end
+    #     return H
+    # end
+
+    # function H_Qv3(L::Int64,Q::Int64)
+    #     cvec = basis_converter(L,Q)
+    #     H0 = make_H(L)
+    #     return H0[cvec,cvec]
+    # end
+end
