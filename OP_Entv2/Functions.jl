@@ -1,7 +1,7 @@
 include("Dependencies.jl")
 
 
-#Hamiltonian Maker Etc.
+#Hamiltonian Maker
 begin
     Id = Array{ComplexF64}([1 0; 0 1])
     X = Array{ComplexF64}([0 1; 1 0])
@@ -89,6 +89,9 @@ end
 
 
 
+
+
+
 #Core bitstrings and Qspace functionalities
 begin
     function bitstrings(N::Int64)
@@ -113,13 +116,13 @@ begin
         return states
     end
 
-
+    "warning:this function might be off by 1 in the index it puts out"
     function getbitindex(bitstring::Vector{Int64}, L::Int64)
-        return sum(bitstring .* (2 .^ (0:(L-1))))
+        return (sum(bitstring .* (2 .^ (0:(L-1))))+1)
     end
 
     function getbitindex(bitstring::SparseArrays.SparseVector{Int64,Int64}, L::Int64)
-        return sum(bitstring .* (2 .^ (0:(L-1))))
+        return (sum(bitstring .* (2 .^ (0:(L-1))))+1)
     end
 
 
@@ -143,6 +146,7 @@ end
 
 
 begin
+    "This function is a very specific helper function. It is not recommended that you use it."
     function get_index_very_specific(X::Tuple{Tuple{SparseArrays.SparseVector{Int64,Int64},SparseArrays.SparseVector{Int64,Int64}},Tuple{SparseArrays.SparseVector{Int64,Int64},SparseArrays.SparseVector{Int64,Int64}}}; length::Int64)
         return (getbitindex(vcat(X[1][1], X[2][1]), length), getbitindex(vcat(X[1][2], X[2][2]), length))
     end
@@ -174,11 +178,35 @@ begin
 
         return [(basis_dict[entry[1]], basis_dict[entry[2]]) for entry in P]
     end
+
+    function Charge_Partitions(L::Int64,Q::Int64,A::Int64,B::Int64)
+        if Q > L
+            exit()
+        end
+        Partitions = Vector{Vector{Int64}}([])
+        for QA in 0:Q
+            QB = Q - QA
+            if ( QA ≤ A ) && ( QB ≤ B )
+                append!(Partitions, [[QA, QB]])
+            end
+        end
+        return Partitions
+    end
 end
 
 
-CTC  =  QtoSVD_Basis_Tuple(L = 10, Q = 5, A = 4, B = 6, QA = 2, QAtilde = 3)
+#time evolution
+begin
+    function Time_evolution(Evec::Vector{Float64}, S::Matrix{ComplexF64},t::Float64)
+        return S*SparseArrays.spdiagm(exp.(- im * t * Evec))*S'
+    end
 
-A = LinearAlgebra.normalize(H_Q(10,5))
-
-sdfhds = SparseArrays.sparse([ A[entry...] for entry in CTC])
+    function Op_time_evolution(Evec::Vector{Float64}, S::Matrix{ComplexF64},t::Float64, Op::Matrix{ComplexF64})
+        U = Time_evolution(Evec::Vector{Float64}, S::Matrix{ComplexF64}, t::Float64)
+        return U' * Op * U
+    end
+    function Op_time_evolution(Evec::Vector{Float64}, S::Matrix{ComplexF64}, t::Float64, Op::SparseArrays.SparseMatrixCSC{ComplexF64, Int64})
+        U = Time_evolution(Evec::Vector{Float64}, S::Matrix{ComplexF64}, t::Float64)
+        return U' * Op * U
+    end
+end
