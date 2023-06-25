@@ -2,13 +2,11 @@ include("H_Maker.jl")
 
 
 
-
-
+##Please just generally check this code is correct because I feel like it is doing weird shit
 function bitstrings(N::Int64)
     possibilities = collect(Iterators.product(Iterators.repeated((true, false), N)...))
     return reverse.(reshape(possibilities, (2^N)))
 end
-
 
 function basis_bitstrings(L::Int64, Q::Int64; sparse::Bool=true)
     if sparse == true

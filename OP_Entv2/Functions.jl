@@ -116,7 +116,7 @@ begin
         return states
     end
 
-    "warning:this function might be off by 1 in the index it puts out"
+    "warning:this function might be off by 1 in the index it puts out (fixed!!! but still treat it with suspicion)"
     function getbitindex(bitstring::Vector{Int64}, L::Int64)
         return (sum(bitstring .* (2 .^ (0:(L-1))))+1)
     end
