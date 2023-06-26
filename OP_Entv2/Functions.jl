@@ -84,10 +84,36 @@ begin
         end
         return H
     end
+
+    function make_H(L::Int64, XYZ::Vector{Float64})
+        H = SparseArrays.spzeros(2^L, 2^L)
+        for i in 1:L
+            H += full_coupling(lattice_mod(i, L), lattice_mod(i + 1, L), L, XYZ)
+        end
+        return H
+    end
+
+    function TFI(L::Int64,g::Float64; disorder::Bool = false)
+        H = SparseArrays.spzeros(Float64,2^L,2^L)
+        for i in 1:L
+            if disorder
+                ds = (2*(rand()-0.5))*g
+            else
+                ds = g
+            end
+            coupling = fill(spId, L)
+            coupling[lattice_mod(i,L)] = spZ
+            coupling[lattice_mod(i+1,L)] = spZ
+            H+= kron_array(coupling)
+            os = fill(spId, L)
+            os[lattice_mod(i,L)] = spX
+            H += (ds * kron_array(os))
+        end
+        return H
+    end
+
+
 end
-
-
-
 
 
 
@@ -95,9 +121,10 @@ end
 #Core bitstrings and Qspace functionalities
 begin
     function bitstrings(N::Int64)
-        possibilities = collect(Iterators.product(Iterators.repeated((true, false), N)...))
-        return reverse.(reshape(possibilities, (2^N)))
+        possibilities = collect(Iterators.product(Iterators.repeated((false, true), N)...))
+        return collect.(reverse.(reshape(possibilities, (2^N))))
     end
+
 
 
     function basis_bitstrings(L::Int64, Q::Int64; sparse::Bool=true)
@@ -108,7 +135,7 @@ begin
         end
         n = 1
         for k in bitstrings(L)
-            if sum(k) == Q
+            if sum(k) == L-Q
                 states[n, :] = collect(Int64.(k))
                 n += 1
             end
@@ -116,16 +143,21 @@ begin
         return states
     end
 
-    "warning:this function might be off by 1 in the index it puts out (fixed!!! but still treat it with suspicion)"
     function getbitindex(bitstring::Vector{Int64}, L::Int64)
-        return (sum(bitstring .* (2 .^ (0:(L-1))))+1)
+        return (sum(bitstring .* (2 .^ ((L-1):-1:0))) + 1)
     end
 
     function getbitindex(bitstring::SparseArrays.SparseVector{Int64,Int64}, L::Int64)
-        return (sum(bitstring .* (2 .^ (0:(L-1))))+1)
+        return (sum(bitstring .* (2 .^ ((L-1):-1:0)))+1)
     end
 
+    function getbitindex(bitstring::SparseArrays.SparseVector{Int64,Bool}, L::Int64)
+        return (sum(bitstring .* (2 .^ ((L-1):-1:0))) + 1)
+    end
 
+    function getbitindex(bitstring::Vector{Bool}, L::Int64)
+        return (sum(bitstring .* (2 .^ ((L-1):-1:0))) + 1)
+    end
 
     function basis_converter(L::Int64, Q::Int64)
         basis = basis_bitstrings(L, Q)
@@ -151,8 +183,8 @@ begin
         return (getbitindex(vcat(X[1][1], X[2][1]), length), getbitindex(vcat(X[1][2], X[2][2]), length))
     end
 
-    "To transform an operator use [op[entry...] for entry in output_of_this_function]"
-    function QtoSVD_Basis_Tuple(; L::Int64, Q::Int64, A::Int64, B::Int64, QA::Int64, QAtilde::Int64)
+    "To transform an operator use [op[entry...] for entry in output_of_this_function]. SOMETHING GOING WRONG HERE!!!!!"
+    function QtoSVD_Basis_Tuple(L::Int64, Q::Int64, A::Int64, B::Int64, QA::Int64, QAtilde::Int64)
         QB = Q - QA
         QBtilde = Q - QAtilde
 
@@ -210,3 +242,5 @@ begin
         return U' * Op * U
     end
 end
+
+
