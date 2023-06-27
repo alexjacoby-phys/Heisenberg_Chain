@@ -170,22 +170,16 @@ end
 
 
 
-L=10
-Q=4
-
-cvec = basis_converter(L,Q)
-
-Q_MAT = Q_op(L)
+H = TFI(L,0.);
+Zcharge = Q_op(L)
 
 
-[ Q_MAT[i,i] for i in cvec]
+H*Zcharge - Zcharge*H
 
 
+H = make_H(L)
 
-
-
-
-
+H*Zcharge - Zcharge*H
 
 
 
