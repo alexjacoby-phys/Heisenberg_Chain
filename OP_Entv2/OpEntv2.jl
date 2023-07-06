@@ -3,21 +3,21 @@ include("Functions.jl")
 
 home = pwd()
 
-fob = "OP_ENT_DAT_V1"
+fob = "OP_ENT_DAT_LT_V1"
 mkdir(fob)
 cd(fob)
 
 L_min = 5
-L_max = 7
+L_max = 16
 L_RNG = L_min:1:L_max
 
-T_min = 0.
-T_max = 5.
-δ = 0.01
+T_min = 100.
+T_max = 200.
+δ = 5.
 τ = T_min : δ : T_max
 
-
-
+touch("Time.txt")
+DelimitedFiles.writedlm("Time.txt",Vector(τ))
 
 for L in L_RNG
     fn = string("L=", L, ".txt")
@@ -45,7 +45,7 @@ for L in L_RNG
             svdmat = [psi[entry...] for entry in CTC]
             append!(dat_vec, LinearAlgebra.svdvals(svdmat)...)
         end
-        append!(dat_mat[t_index], dat_vec...)
+        append!(dat_mat[t_index], (dat_vec .^2)...)
 
     end
     DelimitedFiles.writedlm(fn, dat_mat)
