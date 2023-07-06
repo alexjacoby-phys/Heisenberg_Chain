@@ -1,4 +1,5 @@
-include("Dependencies.jl")
+# include("Dependencies.jl")
+import LinearAlgebra, SparseArrays, DelimitedFiles, Plots
 
 
 #Hamiltonian Maker
@@ -173,6 +174,12 @@ begin
         cvec = basis_converter(L, Q)
         H0 = make_H(L)
         return H0[cvec, cvec]
+    end
+
+    function Q_op(L::Int64)
+        Q_op_init = SparseArrays.spzeros(ComplexF64, 2^L, 2^L)
+        Q_op_init[LinearAlgebra.diagind(Q_op_init)] = [L - sum(digits(i, base=2)) for i in 0:((2^L)-1)]
+        return Q_op_init
     end
 end
 

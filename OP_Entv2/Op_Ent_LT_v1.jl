@@ -2,14 +2,16 @@
 include("Functions.jl")
 
 
-L = 10
-Q = 5
-A = 4 
-B = 6
 
-T = 50.
-δ = 0.02
-τ = 0.0:δ:T
+L = 14
+Q = 7
+A = 7
+B = 7
+
+T_0 = 100.
+T = 400.
+δ = 10.
+τ = T_0:δ:T
 
 
 
@@ -21,6 +23,8 @@ eigdat = LinearAlgebra.eigen(Matrix(H_Q(L,Q)))
 Evec = eigdat.values
 S = eigdat.vectors
 
+
+partitions = Charge_Partitions(L, Q, A, B)
 dat = []
 cvec = basis_converter(L, Q)
 opinit = LinearAlgebra.normalize(kron(coupling(1, 2, spZ, spZ, L)...)[cvec, cvec])
@@ -159,14 +163,6 @@ Y = [-LinearAlgebra.dot(entry, log.(entry)) for entry in data]
 # [(basis_dict[entry[1]], basis_dict[entry[2]]) for entry in P]
 
 
-
-
-
-function Q_op(L::Int64)
-    Q_op_init = SparseArrays.spzeros(ComplexF64, 2^L, 2^L)
-    Q_op_init[LinearAlgebra.diagind(Q_op_init)] = [L - sum(digits(i, base=2)) for i in 0:((2^L)-1)]
-    return Q_op_init
-end
 
 
 
