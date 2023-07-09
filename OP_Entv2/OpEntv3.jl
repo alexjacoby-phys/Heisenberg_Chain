@@ -3,17 +3,17 @@ include("Functions.jl")
 
 home = pwd()
 
-fob = "OP_ENT_DAT_Vtest"
+fob = "OP_ENT_LT_DATA"
 mkdir(fob)
 cd(fob)
 
-L_min = 10
-L_max = 15
+L_min = 4
+L_max = 18
 L_RNG = L_min:1:L_max
 
-T_min = 0.
-T_max = 2.
-δ = 0.05
+T_min = 400.
+T_max = 600.
+δ = 5.
 τ = T_min : δ : T_max
 
 touch("Time.txt")
@@ -51,3 +51,4 @@ for L in L_RNG
     DelimitedFiles.writedlm(fn, dat_mat)
     println("L = ",L, " Done")
 end
+cd(home)
