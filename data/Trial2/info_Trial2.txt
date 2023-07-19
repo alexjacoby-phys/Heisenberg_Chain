@@ -1,4 +1,0 @@
-System size = 8
-Max Time = 5.0
-Time Step = 0.01
-Disorder Strengths = [0.0, 0.05, 0.1, 0.25, 0.5]
